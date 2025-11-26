@@ -36,6 +36,8 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 10px;
+            position: relative;
+            /* For absolute positioning of checkbox */
         }
 
         .tab {
@@ -135,12 +137,42 @@
             font-size: 12px;
             margin-top: 5px;
         }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+
+        .pulse-btn {
+            animation: pulse 2s infinite;
+            background-color: #28a745 !important;
+            /* Green for Send */
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="tabs">
+            <!-- Buffered Toggle (Compact, Left) -->
+            <label
+                style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); font-size: 10px; color: #888; display: flex; align-items: center; gap: 4px;">
+                <input type="checkbox" id="buffered-mode" onchange="toggleBufferedMode()"> Buffered
+            </label>
+
             <div class="tab active" onclick="switchTab('keyboard')">Keyboard</div>
             <div class="tab" onclick="switchTab('trackpad')">Trackpad</div>
         </div>
@@ -149,10 +181,11 @@
             <textarea id="input-area" placeholder="Type here..." autocomplete="off" autocorrect="off"
                 autocapitalize="off" spellcheck="false"></textarea>
             <div class="controls" style="grid-template-columns: repeat(2, 1fr);">
-                <!-- Row 1: Paste and Clear (Nested for sizing) -->
+                <!-- Row 1: Paste/Send and Clear -->
                 <div style="grid-column: span 2; display: flex; gap: 8px;">
-                    <button onclick="sendPaste()" style="background-color: #007bff; flex: 1;">Paste</button>
-                    <button onclick="clearInput()"
+                    <button id="paste-send-btn" onclick="handlePasteOrSend()"
+                        style="background-color: #007bff; flex: 1;">Paste</button>
+                    <button id="clear-btn" onclick="clearInput()"
                         style="background-color: #dc3545; width: 80px; font-size: 14px;">Clear</button>
                 </div>
 
@@ -226,8 +259,73 @@
 
         // Keyboard
         const inputArea = document.getElementById('input-area');
+        const bufferedCheckbox = document.getElementById('buffered-mode');
+        const pasteSendBtn = document.getElementById('paste-send-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        let isBuffered = false;
+        let typingTimer;
+
+        function toggleBufferedMode() {
+            isBuffered = bufferedCheckbox.checked;
+
+            // Force blur to reset keyboard state
+            inputArea.blur();
+
+            if (isBuffered) {
+                // Buffered Mode ON
+                inputArea.setAttribute('autocomplete', 'on');
+                inputArea.setAttribute('autocorrect', 'on');
+                inputArea.setAttribute('autocapitalize', 'on');
+                inputArea.setAttribute('spellcheck', 'true');
+                inputArea.placeholder = "Type & Press Send...";
+
+                // UI Changes
+                pasteSendBtn.textContent = "Send";
+                pasteSendBtn.style.backgroundColor = "#28a745"; // Green
+                clearBtn.style.display = 'none'; // Hide Clear
+            } else {
+                // Buffered Mode OFF (Real-time)
+                inputArea.setAttribute('autocomplete', 'off');
+                inputArea.setAttribute('autocorrect', 'off');
+                inputArea.setAttribute('autocapitalize', 'off');
+                inputArea.setAttribute('spellcheck', 'false');
+                inputArea.placeholder = "Type here...";
+
+                // UI Changes
+                pasteSendBtn.textContent = "Paste";
+                pasteSendBtn.style.backgroundColor = "#007bff"; // Blue
+                pasteSendBtn.classList.remove('pulse-btn');
+                clearBtn.style.display = 'block'; // Show Clear
+            }
+
+            // Re-focus after a short delay to ensure attributes apply
+            setTimeout(() => inputArea.focus(), 50);
+        }
 
         inputArea.addEventListener('input', (e) => {
+            // Auto-send limit
+            if (inputArea.value.length >= 1000) {
+                if (isBuffered) {
+                    sendText(); // Auto-send
+                } else {
+                    inputArea.value = ''; // Clear in realtime mode
+                }
+                return;
+            }
+
+            if (isBuffered) {
+                // Animation Logic
+                pasteSendBtn.classList.remove('pulse-btn');
+                clearTimeout(typingTimer);
+                if (inputArea.value.length > 0) {
+                    typingTimer = setTimeout(() => {
+                        pasteSendBtn.classList.add('pulse-btn');
+                    }, 1500); // Pulse after 1.5s idle
+                }
+                return;
+            }
+
+            // Real-time Mode Logic
             if (e.inputType === 'insertText' && e.data) {
                 socket.emit('type_text', { text: e.data });
             } else if (e.inputType === 'deleteContentBackward') {
@@ -236,11 +334,25 @@
                 socket.emit('press_key', { key: 'enter' });
                 inputArea.value = '';
             }
-
-            if (inputArea.value.length > 1000) {
-                inputArea.value = '';
-            }
         });
+
+        function handlePasteOrSend() {
+            if (isBuffered) {
+                sendText();
+            } else {
+                sendPaste();
+            }
+        }
+
+        function sendText() {
+            const text = inputArea.value;
+            if (text) {
+                socket.emit('type_text', { text: text });
+                inputArea.value = '';
+                pasteSendBtn.classList.remove('pulse-btn');
+                if (navigator.vibrate) navigator.vibrate(20);
+            }
+        }
 
         function clearInput() {
             inputArea.value = '';
@@ -265,6 +377,20 @@
         let lastX = 0, lastY = 0;
         let isTouching = false;
 
+        // Throttle function
+        function throttle(func, limit) {
+            let inThrottle;
+            return function () {
+                const args = arguments;
+                const context = this;
+                if (!inThrottle) {
+                    func.apply(context, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            }
+        }
+
         trackpad.addEventListener('touchstart', (e) => {
             isTouching = true;
             lastX = e.touches[0].clientX;
@@ -272,11 +398,12 @@
             e.preventDefault();
         });
 
-        trackpad.addEventListener('touchmove', (e) => {
+        // Throttled touchmove
+        trackpad.addEventListener('touchmove', throttle((e) => {
             if (!isTouching) return;
             const x = e.touches[0].clientX;
             const y = e.touches[0].clientY;
-            const dx = (x - lastX) * 2; // Sensitivity
+            const dx = (x - lastX) * 2;
             const dy = (y - lastY) * 2;
 
             socket.emit('move_mouse', { dx: dx, dy: dy });
@@ -284,7 +411,7 @@
             lastX = x;
             lastY = y;
             e.preventDefault();
-        });
+        }, 30));
 
         trackpad.addEventListener('touchend', (e) => {
             isTouching = false;
