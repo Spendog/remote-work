@@ -1,40 +1,36 @@
-# Remote Keyboard & Mouse
+# Remote Work (v0.333)
 
-Turn your smartphone into a remote keyboard and trackpad for your PC. Control your computer from across the room with low latency and a clean, dark-mode interface.
+**Current Status:** Pre-Alpha / Foundation  
+**Base:** Forked from [Remote Keyboard v1.2](https://github.com/Spendog/remote-keyboard)
 
-## Features (v1.2)
+## Overview
+This project is the evolution of the Remote Keyboard tool into a comprehensive "Remote Work" suite. The goal is to build an overarching program that provides seamless connection and specific productivity features for remote control and workflow management.
 
-*   **Remote Control**: Use your phone as a wireless keyboard and mouse trackpad.
-*   **Buffered Input Mode**: Type with full autocorrect and predictive text on your phone, then send the message in one go. Perfect for long messages.
-*   **Smart Throttling**: Optimized mouse movement for smooth performance over Wi-Fi.
-*   **Custom Shortcuts**: Create a desktop shortcut with your own custom PNG icon using the included script.
-*   **Secure Pairing**: Uses a token-based QR code system to ensure only you can control your PC.
+**Target Version 1.0 Goal:** A fully shaped idea with expanded features beyond simple input control.
 
-## Installation
+## Installation & Usage
+(Inherited from Remote Keyboard v1.2)
 
-1.  **Clone or Download** this repository.
-2.  **Run Setup**: Double-click `setup.bat` to install Python dependencies automatically.
-    *   *Note: Requires Python 3.12+ installed and added to PATH.*
+1.  **Run Setup**: `setup.bat` (Installs Python dependencies)
+2.  **Start App**: `run.bat`
+3.  **Connect**: Scan the QR code with your phone.
 
-## Usage
+## Developer Instructions
 
-1.  **Start the App**: Double-click `run.bat`.
-2.  **Connect**:
-    *   A QR code will appear on your screen.
-    *   Scan it with your phone's camera.
-    *   Open the link to start controlling your PC.
-3.  **Buffered Mode**:
-    *   Toggle the "Buffered" checkbox in the app to enable autocorrect.
-    *   Type your message and hit "Send" (Green button).
+### Versioning
+*   **v0.333**: Current foundation (Remote Keyboard v1.2 engine).
+*   **v1.0**: The first major release of the full "Remote Work" suite.
 
-## Custom Shortcut
+### Project Structure
+*   `app.py`: Core Flask server and Socket.IO logic.
+*   `gui_app.py`: Desktop GUI wrapper (PyQt/Tkinter).
+*   `templates/remote.html`: The mobile frontend interface.
 
-Want a fancy icon on your desktop?
-1.  Run `create_shortcut_advanced.py` (or use the command line).
-2.  Select a PNG image when prompted.
-3.  A shortcut will be created on your Desktop. Right-click and "Pin to Taskbar" if desired!
+## Roadmap & Future Features
+*   [ ] **Expanded Control**: Beyond keyboard/mouse (e.g., app launching, media control).
+*   [ ] **Workflow Tools**: Features specific to remote work productivity.
+*   [ ] **Security Enhancements**: Advanced pairing and encryption.
+*   [ ] **UI Overhaul**: A new interface for the expanded feature set.
 
-## Troubleshooting
-
-*   **Firewall**: If you can't connect, ensure "Python" is allowed through your Windows Firewall on Private Networks.
-*   **Same Network**: Your phone and PC must be on the same Wi-Fi network.
+---
+*Note: This repository was manually branched from Remote Keyboard due to GitHub restrictions on forking own repositories.*
