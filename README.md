@@ -1,40 +1,17 @@
-# Remote Keyboard & Mouse
+# Remote Work - Extreme Edition (v0.3333)
 
-Turn your smartphone into a remote keyboard and trackpad for your PC. Control your computer from across the room with low latency and a clean, dark-mode interface.
+## Overview
+This is the experimental "Extreme" branch of the Remote Keyboard project. It shares the same stable core as v1.0 but is the staging ground for advanced, high-risk features.
 
-## Features (v1.2)
+## Current Version: v0.3333
+- **Base**: Stable v1.0 (HTTPS, Token Auth, Lottery Obfuscation).
+- **Status**: Experimental.
 
-*   **Remote Control**: Use your phone as a wireless keyboard and mouse trackpad.
-*   **Buffered Input Mode**: Type with full autocorrect and predictive text on your phone, then send the message in one go. Perfect for long messages.
-*   **Smart Throttling**: Optimized mouse movement for smooth performance over Wi-Fi.
-*   **Custom Shortcuts**: Create a desktop shortcut with your own custom PNG icon using the included script.
-*   **Secure Pairing**: Uses a token-based QR code system to ensure only you can control your PC.
-
-## Installation
-
-1.  **Clone or Download** this repository.
-2.  **Run Setup**: Double-click `setup.bat` to install Python dependencies automatically.
-    *   *Note: Requires Python 3.12+ installed and added to PATH.*
+## Planned Upgrades
+1.  **Eye Tracking Integration**: Control the mouse cursor using webcam-based eye tracking.
+2.  **Global Connectivity**: WebRTC/Cloud Relay to allow control from outside the local network.
+3.  **Advanced Gestures**: Multi-touch gesture support for the trackpad.
+4.  **Voice Commands**: Execute macros via voice input.
 
 ## Usage
-
-1.  **Start the App**: Double-click `run.bat`.
-2.  **Connect**:
-    *   A QR code will appear on your screen.
-    *   Scan it with your phone's camera.
-    *   Open the link to start controlling your PC.
-3.  **Buffered Mode**:
-    *   Toggle the "Buffered" checkbox in the app to enable autocorrect.
-    *   Type your message and hit "Send" (Green button).
-
-## Custom Shortcut
-
-Want a fancy icon on your desktop?
-1.  Run `create_shortcut_advanced.py` (or use the command line).
-2.  Select a PNG image when prompted.
-3.  A shortcut will be created on your Desktop. Right-click and "Pin to Taskbar" if desired!
-
-## Troubleshooting
-
-*   **Firewall**: If you can't connect, ensure "Python" is allowed through your Windows Firewall on Private Networks.
-*   **Same Network**: Your phone and PC must be on the same Wi-Fi network.
+Same as the stable version for now. Run `run.bat` to start.
